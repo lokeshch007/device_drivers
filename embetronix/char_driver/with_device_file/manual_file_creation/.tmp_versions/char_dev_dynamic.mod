@@ -1,0 +1,2 @@
+/home/lokesh/learning/device_drivers/embetronix/char_driver/with_device_file/manual_file_creation/char_dev_dynamic.ko
+/home/lokesh/learning/device_drivers/embetronix/char_driver/with_device_file/manual_file_creation/char_dev_dynamic.o
