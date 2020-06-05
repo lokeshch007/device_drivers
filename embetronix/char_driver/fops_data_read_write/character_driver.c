@@ -10,12 +10,14 @@
 #include<linux/string.h>/*for memset() */
 
 #define MEM_SIZE 1024
+#define CLASS_NAME "lok_char_class"
+#define DEVICE_NAME "lok_char_dev"
 
 
 dev_t dev = 0;
 static struct class *dev_class;
 static struct cdev char_cdev;
-uint8_t *kernel_buffer=NULL;
+static uint8_t kernel_buffer[MEM_SIZE];
 
 static int __init char_driver_init(void);
 static void __exit char_driver_exit(void);
@@ -38,7 +40,6 @@ static struct file_operations fops =
 static int char_open(struct inode *inode,struct file *file)
 {
 	printk(KERN_INFO "char_open() called\n");
-	
 
 	return 0;
 }
@@ -96,7 +97,7 @@ static ssize_t char_write(struct file *file,const char *buf,size_t len,loff_t *o
 static int __init char_driver_init(void)
 {
 	/*Allocating MAJOR,MINOR numbers dynamically */
-	if(alloc_chrdev_region(&dev,0,1,"cha_dev_dynamic") < 0)
+	if(alloc_chrdev_region(&dev,1,1,DEVICE_NAME) < 0)
 	{
 		printk(KERN_INFO "Cannot allocate major,minor number for device\n");
 		return -1;
@@ -115,26 +116,19 @@ static int __init char_driver_init(void)
 	}
 
 	/*Creating struct class*/
-	if((dev_class=class_create(THIS_MODULE,"char_dev_class")) == NULL)
+	if((dev_class=class_create(THIS_MODULE,CLASS_NAME)) == NULL)
 	{
 		printk(KERN_INFO "Cannot create the struct class for device\n");
 		goto r_class;
 	}
 
 	/*Creating device from class*/
-	if((device_create(dev_class,NULL,dev,NULL,"char_dev"))==NULL)
+	if((device_create(dev_class,NULL,dev,NULL,DEVICE_NAME))==NULL)
 	{
 		printk(KERN_INFO "Cannot create device\n");
 		goto r_device;
 	}
 
-	/*allocating kernel buffer*/
-	if((kernel_buffer=kmalloc(MEM_SIZE,GFP_KERNEL))==0){
-		printk(KERN_INFO "Cannot allocate kernel memory with kmalloc()\n");
-		return -1;
-	}
-	printk(KERN_INFO "Kernel Buffer allocated\n");
-	memset(kernel_buffer,0,MEM_SIZE);
 	printk(KERN_INFO "Kernel Buffer cleaned from previous date\n");
 	printk(KERN_INFO "char_dev inserted successfully\n");
 
